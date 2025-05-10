@@ -1,0 +1,416 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Image and URL</title>
+<style>
+  :root {
+    --primary-color: #4a90e2;
+    --secondary-color: #007bff;
+    --dark-color: #333;
+    --light-color: #f8f9fa;
+    --border-radius: 6px;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    line-height: 1.6;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .menu-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+  }
+  
+  .menu-button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .menu-icon {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--dark-color);
+    position: relative;
+    transition: var(--transition);
+  }
+  
+  .menu-icon:before, .menu-icon:after {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 3px;
+    background-color: var(--dark-color);
+    transition: var(--transition);
+  }
+  
+  .menu-icon:before {
+    top: -8px;
+  }
+  
+  .menu-icon:after {
+    top: 8px;
+  }
+  
+  h2 {
+    font-size: 24px;
+    color: var(--primary-color);
+    text-align: center;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  }
+  
+  .file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+  }
+  
+  .file-input-label {
+    display: block;
+    background-color: #f0f0f0;
+    color: var(--dark-color);
+    text-align: center;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    margin-bottom: 5px;
+    border: 1px dashed #ccc;
+    transition: var(--transition);
+  }
+  
+  .file-input-label:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .file-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+  
+  .file-name {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .btn-primary {
+    background-color: var(--secondary-color);
+    color: white;
+    width: 100%;
+  }
+  
+  .btn-primary:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+  }
+  
+  .loader {
+    display: none;
+    margin: 20px auto;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--secondary-color);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .status {
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .status.success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #218838;
+  }
+  
+  .status.error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+  
+  /* Slide menu styles */
+  .slide-menu {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100%;
+    background-color: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: var(--transition);
+    overflow-y: auto;
+  }
+  
+  .slide-menu.open {
+    left: 0;
+  }
+  
+  .menu-header {
+    padding: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .close-menu {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .menu-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .menu-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    transition: var(--transition);
+  }
+  
+  .menu-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .menu-item a {
+    text-decoration: none;
+    color: var(--dark-color);
+    display: block;
+    font-size: 16px;
+  }
+  
+  .menu-item.active {
+    background-color: rgba(74, 144, 226, 0.1);
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .menu-item.active a {
+    color: var(--primary-color);
+  }
+  
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+    transition: var(--transition);
+  }
+</style>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="slide-menu" id="slideMenu">
+  <div class="menu-header">
+    <h3>Menu</h3>
+    <button class="close-menu" id="closeMenu">&times;</button>
+  </div>
+  <ul class="menu-list">
+    <li class="menu-item"><a href="index.html">Dashboard</a></li>
+    <li class="menu-item active"><a href="slider.html">Slider</a></li>
+    <li class="menu-item"><a href="url.html">URL</a></li>
+    <li class="menu-item"><a href="video.html">Video</a></li>
+  </ul>
+</div>
+
+<div class="container">
+  <div class="header">
+    <button class="menu-button" id="menuButton">
+      <span class="menu-icon"></span>
+    </button>
+    <h2>SLIDER IMAGES</h2>
+    <div style="width:30px"></div>
+  </div>
+  
+  <div class="form-group">
+    <div class="file-input-wrapper">
+      <label class="file-input-label" for="imageInput">
+        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+      </label>
+      <input type="file" id="imageInput" class="file-input" accept="image/*">
+    </div>
+    <div class="file-name" id="fileName">No file selected</div>
+  </div>
+  
+  <div class="form-group">
+    <input type="text" id="urlInput" class="form-control" placeholder="Enter Redirect URL">
+  </div>
+  
+  <button class="btn btn-primary" id="submitBtn">Upload & Submit</button>
+  
+  <div class="loader" id="loader"></div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+  const menuButton = document.getElementById('menuButton');
+  const closeMenu = document.getElementById('closeMenu');
+  const slideMenu = document.getElementById('slideMenu');
+  const overlay = document.getElementById('overlay');
+  const imageInput = document.getElementById('imageInput');
+  const fileName = document.getElementById('fileName');
+  const urlInput = document.getElementById('urlInput');
+  const submitBtn = document.getElementById('submitBtn');
+  const loader = document.getElementById('loader');
+  const status = document.getElementById('status');
+
+  menuButton.addEventListener('click', function() {
+    slideMenu.classList.add('open');
+    overlay.style.display = 'block';
+  });
+
+  closeMenu.addEventListener('click', closeSlideMenu);
+  overlay.addEventListener('click', closeSlideMenu);
+
+  function closeSlideMenu() {
+    slideMenu.classList.remove('open');
+    overlay.style.display = 'none';
+  }
+
+  imageInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      fileName.textContent = this.files[0].name;
+    } else {
+      fileName.textContent = 'No file selected';
+    }
+  });
+
+  submitBtn.addEventListener('click', submitData);
+
+  function submitData() {
+    const imageFile = imageInput.files[0];
+    const redirectUrl = urlInput.value;
+
+    status.className = 'status';
+    
+    if (!imageFile) {
+      status.textContent = "Please select an image file";
+      status.classList.add('error');
+      return;
+    }
+    
+    if (!redirectUrl.startsWith("http")) {
+      status.textContent = "Please enter a valid URL starting with http";
+      status.classList.add('error');
+      return;
+    }
+
+    loader.style.display = "block";
+    submitBtn.disabled = true;
+    
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    
+    fetch("https://api.imgbb.com/1/upload?key=cbd77dcd0c4607739e74ef010e23146f", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+      const imageUrl = result.data.url;
+      return fetch("https://script.google.com/macros/s/AKfycby8pRYyCqgJFkDg9b_oNHeyPapIJrsfgpoA24eyQUs84OgSFklEqLbQjy4kPer6Tey2/exec", {
+        method: "POST",
+        body: JSON.stringify({ imageUrl, redirectUrl })
+      });
+    })
+    .then(res => res.text())
+    .then(msg => {
+      loader.style.display = "none";
+      status.textContent = msg;
+      status.classList.add('success');
+      submitBtn.disabled = false;
+    })
+    .catch((error) => {
+      loader.style.display = "none";
+      status.textContent = "An error occurred during upload";
+      status.classList.add('error');
+      submitBtn.disabled = false;
+      console.error(error);
+    });
+  }
+</script>

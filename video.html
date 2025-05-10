@@ -1,0 +1,396 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Set YouTube Video</title>
+<style>
+  :root {
+    --primary-color: #4a90e2;
+    --secondary-color: #007bff;
+    --dark-color: #333;
+    --light-color: #f8f9fa;
+    --border-radius: 6px;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    line-height: 1.6;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .menu-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+  }
+  
+  .menu-button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .menu-icon {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--dark-color);
+    position: relative;
+    transition: var(--transition);
+  }
+  
+  .menu-icon:before, .menu-icon:after {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 3px;
+    background-color: var(--dark-color);
+    transition: var(--transition);
+  }
+  
+  .menu-icon:before {
+    top: -8px;
+  }
+  
+  .menu-icon:after {
+    top: 8px;
+  }
+  
+  h2 {
+    font-size: 24px;
+    color: var(--primary-color);
+    text-align: center;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  }
+  
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .btn-primary {
+    background-color: var(--secondary-color);
+    color: white;
+    width: 100%;
+  }
+  
+  .btn-primary:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+  }
+  
+  .loader {
+    display: none;
+    margin: 20px auto;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--secondary-color);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .status {
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .status.success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #218838;
+  }
+  
+  .status.error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+  
+  /* Video preview styles */
+  .video-preview {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    display: none;
+  }
+  
+  .video-preview h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: var(--dark-color);
+  }
+  
+  .embed-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  
+  .embed-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  
+  /* Slide menu styles */
+  .slide-menu {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100%;
+    background-color: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: var(--transition);
+    overflow-y: auto;
+  }
+  
+  .slide-menu.open {
+    left: 0;
+  }
+  
+  .menu-header {
+    padding: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .close-menu {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .menu-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .menu-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    transition: var(--transition);
+  }
+  
+  .menu-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .menu-item a {
+    text-decoration: none;
+    color: var(--dark-color);
+    display: block;
+    font-size: 16px;
+  }
+  
+  .menu-item.active {
+    background-color: rgba(74, 144, 226, 0.1);
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .menu-item.active a {
+    color: var(--primary-color);
+  }
+  
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+    transition: var(--transition);
+  }
+</style>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="slide-menu" id="slideMenu">
+  <div class="menu-header">
+    <h3>Menu</h3>
+    <button class="close-menu" id="closeMenu">&times;</button>
+  </div>
+  <ul class="menu-list">
+    <li class="menu-item"><a href="index.html">Dashboard</a></li>
+    <li class="menu-item"><a href="slider.html">Slider</a></li>
+    <li class="menu-item"><a href="url.html">URL</a></li>
+    <li class="menu-item active"><a href="video.html">Video</a></li>
+  </ul>
+</div>
+
+<div class="container">
+  <div class="header">
+    <button class="menu-button" id="menuButton">
+      <span class="menu-icon"></span>
+    </button>
+    <h2>YOUTUBE VIDEO</h2>
+    <div style="width:30px"></div>
+  </div>
+  
+  <div class="form-group">
+    <input type="text" id="videoUrl" class="form-control" placeholder="Enter YouTube Video URL">
+  </div>
+  
+  <button class="btn btn-primary" id="submitBtn">Submit</button>
+  
+  <div class="loader" id="loader"></div>
+  <div class="status" id="status"></div>
+  
+  <div class="video-preview" id="videoPreview">
+    <h3>Video Preview</h3>
+    <div class="embed-container">
+      <iframe id="videoFrame" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+  const menuButton = document.getElementById('menuButton');
+  const closeMenu = document.getElementById('closeMenu');
+  const slideMenu = document.getElementById('slideMenu');
+  const overlay = document.getElementById('overlay');
+  const videoUrl = document.getElementById('videoUrl');
+  const submitBtn = document.getElementById('submitBtn');
+  const loader = document.getElementById('loader');
+  const status = document.getElementById('status');
+  const videoPreview = document.getElementById('videoPreview');
+  const videoFrame = document.getElementById('videoFrame');
+
+  menuButton.addEventListener('click', function() {
+    slideMenu.classList.add('open');
+    overlay.style.display = 'block';
+  });
+
+  closeMenu.addEventListener('click', closeSlideMenu);
+  overlay.addEventListener('click', closeSlideMenu);
+
+  function closeSlideMenu() {
+    slideMenu.classList.remove('open');
+    overlay.style.display = 'none';
+  }
+
+  videoUrl.addEventListener('input', function() {
+    const id = getVideoId(this.value);
+    if (id) {
+      videoFrame.src = `https://www.youtube.com/embed/${id}`;
+      videoPreview.style.display = 'block';
+    } else {
+      videoPreview.style.display = 'none';
+    }
+  });
+
+  submitBtn.addEventListener('click', submitVideo);
+
+  function getVideoId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length == 11) ? match[2] : null;
+  }
+
+  function submitVideo() {
+    const url = videoUrl.value;
+    const videoId = getVideoId(url);
+    
+    status.className = 'status';
+    
+    if (!videoId) {
+      status.textContent = "Please enter a valid YouTube URL";
+      status.classList.add('error');
+      return;
+    }
+
+    loader.style.display = "block";
+    submitBtn.disabled = true;
+    
+    fetch("https://script.google.com/macros/s/AKfycbz78Uft48I6BOqyLSnEK_HHAq9FRED4rLre-iaihGiDSwMkxuAqSrMtWcxqOYqiDPjf/exec", {
+      method: "POST",
+      body: JSON.stringify({ videoId })
+    })
+    .then(res => res.text())
+    .then(msg => {
+      loader.style.display = "none";
+      status.textContent = msg;
+      status.classList.add('success');
+      submitBtn.disabled = false;
+    })
+    .catch((error) => {
+      loader.style.display = "none";
+      status.textContent = "An error occurred while submitting the video";
+      status.classList.add('error');
+      submitBtn.disabled = false;
+      console.error(error);
+    });
+  }
+</script>
